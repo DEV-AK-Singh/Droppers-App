@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" 
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  role          UserRole
+  name          String
+  phone         String?
+  isActive      Boolean  @default(true)
+
+  ordersAsVendor Order[]  @relation("VendorOrders")
+  ordersAsDropper Order[] @relation("DropperOrders")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id                 String   @id @default(cuid())
+  pickupAddress      String
+  deliveryAddress    String
+  customerName       String
+  customerPhone      String
+  itemDescription    String
+  orderValue         Float
+
+  calculatedDistance Float
+
+  status             OrderStatus @default(PENDING)
+
+  vendorId           String
+  vendor             User     @relation("VendorOrders", fields: [vendorId], references: [id])
+
+  dropperId          String?
+  dropper            User?    @relation("DropperOrders", fields: [dropperId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum UserRole {
+  VENDOR
+  DELIVERY_PARTNER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  ASSIGNED
+  PICKED_UP
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+} 

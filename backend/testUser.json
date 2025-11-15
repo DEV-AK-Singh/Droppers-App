@@ -1,0 +1,32 @@
+[
+  {
+    "success": true,
+    "message": "User registered successfully",
+    "data": {
+      "message": "User registered successfully",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNtaTBscDRxMTAwMDBjcHU4ZmR6NnY1bDciLCJlbWFpbCI6InRlc3RAdmVuZG9yLmNvbSIsInJvbGUiOiJWRU5ET1IiLCJpYXQiOjE3NjMyMzAxMzYsImV4cCI6MTc2MzgzNDkzNn0.Z7jxSpLcl3rL5u8UM78HpFt8q3CrQ9wU-RfBHVSdOLE",
+      "user": {
+        "id": "cmi0lp4q10000cpu8fdz6v5l7",
+        "email": "test@vendor.com",
+        "name": "Test Vendor",
+        "role": "VENDOR",
+        "phone": "1234567890"
+      }
+    }
+  },
+  {
+    "success": true,
+    "message": "Login successful",
+    "data": {
+      "message": "Login successful",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNtaTBscDRxMTAwMDBjcHU4ZmR6NnY1bDciLCJlbWFpbCI6InRlc3RAdmVuZG9yLmNvbSIsInJvbGUiOiJWRU5ET1IiLCJpYXQiOjE3NjMyMzA0NTAsImV4cCI6MTc2MzgzNTI1MH0.kQWMXghI-cl6hwIw7hDLTZsNaxPwQ4-cX7pW81PY5Dg",
+      "user": {
+        "id": "cmi0lp4q10000cpu8fdz6v5l7",
+        "email": "test@vendor.com",
+        "name": "Test Vendor",
+        "role": "VENDOR",
+        "phone": "1234567890"
+      }
+    }
+  }
+]
