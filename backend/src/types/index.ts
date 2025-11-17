@@ -96,15 +96,30 @@ export interface AuthResponse {
 
 // Socket.io types
 export interface ServerToClientEvents {
+  // Order events
   'order:created': (order: Order) => void;
-  'order:accepted': (order: Order) => void;
-  'order:updated': (order: Order) => void;
+  'order:accepted': (data: { orderId: string; timestamp: string }) => void;
+  'order:cancelled': (data: { orderId: string }) => void;
+  
+  // Delivery events
+  'delivery:status-changed': (data: { order: Order; timestamp: string }) => void;
+  'delivery:completed': (data: { order: Order; timestamp: string }) => void;
 }
 
 export interface ClientToServerEvents {
+  // Room joining
   'join:vendor': (vendorId: string) => void;
   'join:dropper': (dropperId: string) => void;
-  'order:accept': (orderId: string, callback: (success: boolean) => void) => void;
+  'join:available-orders': () => void;
+  
+  // Order actions
+  'order:created': (order: Order) => void;
+  'order:cancelled': (data: { orderId: string; vendorId: string }) => void;
+  'order:accept': (orderId: string, callback: (success: boolean, message?: string) => void) => void;
+  
+  // Delivery actions
+  'delivery:status-update': (data: { orderId: string; status: string }) => void;
+  'delivery:completed': (data: { orderId: string }) => void;
 }
 
 // JWT Payload

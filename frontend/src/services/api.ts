@@ -8,7 +8,9 @@ import type {
   Order,
   CreateOrderData,
   ApiError,
-  ErrorResponse
+  ErrorResponse,
+  DashboardStats,
+  DeliveryStats
 } from '../types/auth.ts';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
@@ -92,25 +94,46 @@ export const authAPI = {
     apiCall<{ user: User }>('put', '/auth/profile', data),
 };
 
-// Orders API methods (for future use)
-export const ordersAPI = {
-  create: (data: CreateOrderData): Promise<Order> => 
-    apiCall<Order>('post', '/orders', data),
+// Orders API methods 
+export const ordersAPI = {  
+  // Vendor orders
+  createOrder: (data: CreateOrderData): Promise<Order> => 
+    apiCall<Order>('post', '/orders/vendor/create', data),
 
-  list: (): Promise<Order[]> => 
-    apiCall<Order[]>('get', '/orders'),
+  getVendorOrders: (): Promise<Order[]> => 
+    apiCall<Order[]>('get', '/orders/vendor/my-orders'),
 
-  getMyOrders: (): Promise<Order[]> => 
-    apiCall<Order[]>('get', '/orders/my-orders'),
+  getVendorStats: (): Promise<DashboardStats> => 
+    apiCall<DashboardStats>('get', '/orders/vendor/stats'),
 
-  getById: (id: string): Promise<Order> => 
+  updateOrderStatus: (id: string, status: string): Promise<Order> => 
+    apiCall<Order>('patch', `/orders/vendor/${id}/status`, { status }),
+
+  cancelOrder: (id: string): Promise<Order> => 
+    apiCall<Order>('delete', `/orders/vendor/${id}/cancel`),
+
+  // Delivery partner methods
+  getAvailableOrders: (): Promise<Order[]> => 
+    apiCall<Order[]>('get', '/orders/delivery/available'),
+
+  getMyDeliveries: (): Promise<Order[]> => 
+    apiCall<Order[]>('get', '/orders/delivery/my-deliveries'),
+
+  getDeliveryStats: (): Promise<DeliveryStats> => 
+    apiCall<DeliveryStats>('get', '/orders/delivery/stats'),
+
+  acceptOrder: (orderId: string): Promise<Order> => 
+    apiCall<Order>('post', `/orders/delivery/${orderId}/accept`),
+
+  updateDeliveryStatus: (orderId: string, status: string): Promise<Order> => 
+    apiCall<Order>('patch', `/orders/delivery/${orderId}/status`, { status }),
+
+  completeDelivery: (orderId: string): Promise<Order> => 
+    apiCall<Order>('post', `/orders/delivery/${orderId}/complete`),
+
+  // General orders
+  getOrderById: (id: string): Promise<Order> => 
     apiCall<Order>('get', `/orders/${id}`),
-
-  updateStatus: (id: string, status: string): Promise<Order> => 
-    apiCall<Order>('patch', `/orders/${id}/status`, { status }),
-
-  acceptOrder: (id: string): Promise<Order> => 
-    apiCall<Order>('post', `/orders/${id}/accept`),
 };
 
 // Health check

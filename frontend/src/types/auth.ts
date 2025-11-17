@@ -85,18 +85,30 @@ export interface UpdateOrderData {
 
 // Socket.io types for frontend
 export interface ServerToClientEvents {
+  // Order events
   'order:created': (order: Order) => void;
-  'order:accepted': (order: Order) => void;
-  'order:updated': (order: Order) => void;
-  'order:status-changed': (order: Order) => void;
+  'order:accepted': (data: { orderId: string; timestamp: string }) => void;
+  'order:cancelled': (data: { orderId: string }) => void;
+  
+  // Delivery events
+  'delivery:status-changed': (data: { order: Order; timestamp: string }) => void;
+  'delivery:completed': (data: { order: Order; timestamp: string }) => void;
 }
 
 export interface ClientToServerEvents {
+  // Room joining
   'join:vendor': (vendorId: string) => void;
   'join:dropper': (dropperId: string) => void;
-  'join:order': (orderId: string) => void;
+  'join:available-orders': () => void;
+  
+  // Order actions
+  'order:created': (order: Order) => void;
+  'order:cancelled': (data: { orderId: string; vendorId: string }) => void;
   'order:accept': (orderId: string, callback: (success: boolean, message?: string) => void) => void;
-  'order:update-status': (orderId: string, status: OrderStatus, callback: (success: boolean) => void) => void;
+  
+  // Delivery actions
+  'delivery:status-update': (data: { orderId: string; status: string }) => void;
+  'delivery:completed': (data: { orderId: string }) => void;
 }
 
 // Form error types
@@ -108,9 +120,18 @@ export interface FormErrors {
 export interface DashboardStats {
   totalOrders: number;
   pendingOrders: number;
-  completedOrders: number;
-  totalEarnings?: number;
+  deliveredOrders: number;
+  totalRevenue: number;
   activeDeliveries?: number;
+} 
+
+// Delivery stats types
+export interface DeliveryStats {
+  totalDeliveries: number;
+  completedDeliveries: number;
+  activeDeliveries: number;
+  totalEarnings: number;
+  pendingEarnings?: number;
 }
 
 export interface ApiError {
