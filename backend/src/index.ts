@@ -6,7 +6,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { OrderStatus, PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth';
-import orderRoutes from './routes/orders'; 
+import orderRoutes from './routes/orders';
 import { ServerToClientEvents, ClientToServerEvents, Order } from './types';
 
 // Load environment variables
@@ -18,8 +18,8 @@ const prisma = new PrismaClient();
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL_PROD 
+  origin: process.env.NODE_ENV === 'production'
+    ? process.env.FRONTEND_URL_PROD
     : process.env.FRONTEND_URL_DEV || 'http://localhost:5173',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -61,7 +61,7 @@ app.use('/api/orders', orderRoutes);
 
 // Basic health check route
 app.get('/api/health', (req: express.Request, res: express.Response) => {
-  res.json({ 
+  res.json({
     success: true,
     message: 'Droppers API is running!',
     timestamp: new Date().toISOString(),
@@ -81,9 +81,9 @@ app.use('/', (req: express.Request, res: express.Response) => {
 // Error handling middleware
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('🚨 Unhandled error:', error);
-  
-  const errorMessage = process.env.NODE_ENV === 'production' 
-    ? 'Internal server error' 
+
+  const errorMessage = process.env.NODE_ENV === 'production'
+    ? 'Internal server error'
     : error.message;
 
   res.status(error.status || 500).json({
@@ -100,19 +100,19 @@ io.on('connection', (socket) => {
   // Handle vendor joining their room
   socket.on('join:vendor', (vendorId: string) => {
     socket.join(`vendor:${vendorId}`);
-    console.log(`Vendor ${vendorId} joined room: vendor:${vendorId}`);
+    console.log(`Vendor ${vendorId} joined -> Room: vendor:${vendorId}`);
   });
 
   // Handle delivery partner joining their room
   socket.on('join:dropper', (dropperId: string) => {
     socket.join(`dropper:${dropperId}`);
-    console.log(`Dropper ${dropperId} joined room: dropper:${dropperId}`);
+    console.log(`Dropper ${dropperId} joined -> Room: dropper:${dropperId}`);
   });
 
   // Handle delivery partner joining available orders room
   socket.on('join:available-orders', () => {
     socket.join('available-orders');
-    console.log(`Dropper ${socket.id} joined available orders room`);
+    console.log(`Dropper ${socket.id} joined -> Room: available-orders`);
   });
 
   // Handle order creation from vendor
@@ -130,23 +130,15 @@ io.on('connection', (socket) => {
   });
 
   // Handle order acceptance
-  socket.on('order:accept', async (orderId: string, callback: (success: boolean, message?: string) => void) => {
+  socket.on('order:accept', async (orderId: string, dropperId: string, callback: (success: boolean, message?: string) => void) => {
     try {
       console.log(`Order ${orderId} acceptance attempted by ${socket.id}`);
-      
+
       // Get complete order details
       const order = await prisma.order.findUnique({
         where: { id: orderId },
         include: {
           vendor: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              phone: true
-            }
-          },
-          dropper: {
             select: {
               id: true,
               name: true,
@@ -167,9 +159,9 @@ io.on('connection', (socket) => {
         return;
       }
 
-      // Get delivery partner details (in real app, use actual user ID from auth)
+      // Get delivery partner details (using socket.id as temporary user ID)
       const dropper = await prisma.user.findUnique({
-        where: { id: socket.id },
+        where: { id: dropperId },
         select: {
           id: true,
           name: true,
@@ -210,22 +202,25 @@ io.on('connection', (socket) => {
         }
       });
 
-      callback(true, 'Order accepted successfully');
-      
-      // Notify all delivery partners that order was accepted
-      socket.to('available-orders').emit('order:accepted', { 
+      console.log('🔄 Emitting socket events for order acceptance...');
+
+      // Notify all delivery partners that order was accepted (remove from their available orders)
+      socket.to('available-orders').emit('order:accepted', {
         orderId,
         timestamp: new Date().toISOString()
       });
+      console.log(`📢 Notified available-orders about order ${orderId} acceptance`);
 
       // Notify vendor about order acceptance with complete order data
       socket.to(`vendor:${order.vendorId}`).emit('delivery:status-changed', {
         order: updatedOrder as Order,
         timestamp: new Date().toISOString()
       });
-      
-      console.log(`✅ Order ${orderId} accepted by ${socket.id}`);
-      
+      console.log(`📢 Notified vendor ${order.vendorId} about order ${orderId} acceptance`);
+
+      console.log(`✅ Order ${orderId} accepted by ${socket.id}`); 
+
+      callback(true, 'Order accepted successfully');
     } catch (error) {
       console.error('Order acceptance error:', error);
       callback(false, 'Failed to accept order');
@@ -237,7 +232,7 @@ io.on('connection', (socket) => {
     try {
       const { orderId, status } = data;
       console.log(`Delivery status update: Order ${orderId} -> ${status}`);
-      
+
       // Get order details from database
       const order = await prisma.order.findUnique({
         where: { id: orderId },
@@ -307,7 +302,7 @@ io.on('connection', (socket) => {
     try {
       const { orderId } = data;
       console.log(`Delivery completed: ${orderId}`);
-      
+
       // Get order details from database
       const order = await prisma.order.findUnique({
         where: { id: orderId },
@@ -380,13 +375,13 @@ io.on('connection', (socket) => {
 // Graceful shutdown handling
 const gracefulShutdown = (signal: string) => {
   console.log(`\n📢 Received ${signal}. Starting graceful shutdown...`);
-  
+
   httpServer.close((err) => {
     if (err) {
       console.error('Error during shutdown:', err);
       process.exit(1);
     }
-    
+
     console.log('✅ HTTP server closed.');
     process.exit(0);
   });

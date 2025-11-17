@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { ordersAPI } from "../../services/api";
-import type { Order, DashboardStats, CreateOrderData } from "../../types/auth";
+import { type Order, type DashboardStats, type CreateOrderData, OrderStatus, type ServerToClientEvents, type ClientToServerEvents } from "../../types/auth";
 import { VendorStats } from "./VendorStats";
 import { CreateOrderForm } from "../orders/CreateOrderForm";
 import { OrderList } from "../orders/OrderList";
@@ -20,7 +20,10 @@ export const VendorDashboard: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creatingOrder, setCreatingOrder] = useState(false);
   const [error, setError] = useState<string>("");
-  const [socket, setSocket] = useState<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket<
+      ServerToClientEvents,
+      ClientToServerEvents
+    > | null>(null);
 
   const loadData = async () => {
     try {
@@ -60,40 +63,66 @@ export const VendorDashboard: React.FC = () => {
 
     // Listen for delivery status updates (including order acceptance)
     newSocket.on("delivery:status-changed", (data: { order: Order }) => {
-      console.log("Delivery status changed:", data);
+      console.log("📢 Vendor received delivery:status-changed:", data);
 
-      // Update the specific order with new status and delivery partner info
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.id === data.order.id
-            ? data.order // Replace with complete order data from server
-            : order
-        )
-      );
+      if (data.order) {
+        // Update the specific order with new status and delivery partner info
+        setOrders((prev) =>
+          prev.map((order) =>
+            order.id === data.order.id
+              ? {
+                  ...data.order,
+                  status: data.order.status,
+                  dropperId: data.order.dropperId,
+                  dropper: data.order.dropper,
+                }
+              : order
+          )
+        );
 
-      // Refresh stats to get updated counts
-      loadStats();
+        console.log(
+          `🔄 Vendor: Order ${data.order.id} updated to status: ${data.order.status}`
+        );
 
-      console.log(`🔄 Order status updated to: ${data.order.status}`);
+        // Refresh stats to get updated counts
+        loadStats();
+      } else {
+        console.error(
+          "❌ Vendor: No order data in delivery:status-changed event"
+        );
+      }
     });
 
     // Listen for delivery completion
     newSocket.on("delivery:completed", (data: { order: Order }) => {
-      console.log("Delivery completed:", data);
+      console.log("📢 Vendor received delivery:completed:", data);
 
-      // Update the specific order as delivered
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.id === data.order.id
-            ? data.order // Replace with complete order data from server
-            : order
-        )
-      );
+      if (data.order) {
+        // Update the specific order as delivered
+        setOrders((prev) =>
+          prev.map((order) =>
+            order.id === data.order.id
+              ? {
+                  ...order,
+                  status: OrderStatus.DELIVERED,
+                  dropper: data.order.dropper,
+                }
+              : order
+          )
+        );
 
-      // Refresh stats
-      loadStats();
+        console.log(`✅ Vendor: Order ${data.order.id} marked as delivered`);
 
-      console.log("🎉 Delivery completed successfully!");
+        // Refresh stats
+        loadStats();
+      } else {
+        console.error("❌ Vendor: No order data in delivery:completed event");
+      }
+    });
+
+    // Debug: Log all socket events
+    newSocket.onAny((eventName, ...args) => {
+      console.log(`🔍 Vendor Socket Event: ${eventName}`, args);
     });
 
     newSocket.on("disconnect", () => {

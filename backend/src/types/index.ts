@@ -115,7 +115,7 @@ export interface ClientToServerEvents {
   // Order actions
   'order:created': (order: Order) => void;
   'order:cancelled': (data: { orderId: string; vendorId: string }) => void;
-  'order:accept': (orderId: string, callback: (success: boolean, message?: string) => void) => void;
+  'order:accept': (orderId: string, dropperId: string, callback: (success: boolean, message?: string) => void) => void;
   
   // Delivery actions
   'delivery:status-update': (data: { orderId: string; status: string }) => void;

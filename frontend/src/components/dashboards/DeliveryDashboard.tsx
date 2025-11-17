@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { ordersAPI } from "../../services/api";
-import { type Order, OrderStatus, type DeliveryStats, type ClientToServerEvents, type ServerToClientEvents } from "../../types/auth";
+import {
+  type Order,
+  OrderStatus,
+  type DeliveryStats,
+  type ClientToServerEvents,
+  type ServerToClientEvents,
+} from "../../types/auth";
 import { DeliveryStats as DeliveryStatsComponent } from "./DeliveryStats";
 import { AvailableOrders } from "../delivery/AvailableOrders";
 import { MyDeliveries } from "../delivery/MyDeliveries";
@@ -23,7 +29,10 @@ export const DeliveryDashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [acceptingOrderId, setAcceptingOrderId] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
-  const [socket, setSocket] = useState<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+  const [socket, setSocket] = useState<Socket<
+    ServerToClientEvents,
+    ClientToServerEvents
+  > | null>(null);
 
   const loadData = async () => {
     try {
@@ -58,36 +67,84 @@ export const DeliveryDashboard: React.FC = () => {
 
       // Join available orders room
       newSocket.emit("join:available-orders");
+      console.log("📢 Delivery partner joined available-orders room");
 
       // Join delivery partner's personal room
       if (user?.id) {
         newSocket.emit("join:dropper", user.id);
+        console.log(`Delivery partner ${user.id} joined dropper room`);
       }
     });
 
     // Listen for new orders from vendors
     newSocket.on("order:created", (newOrder: Order) => {
-      console.log("New order available:", newOrder);
-      // Add new order to available orders
-      setAvailableOrders((prev) => [newOrder, ...prev]);
+      console.log("📢 Delivery partner received order:created:", newOrder);
+
+      if (newOrder && newOrder.id) {
+        // Add new order to available orders
+        setAvailableOrders((prev) => {
+          const exists = prev.find((order) => order.id === newOrder.id);
+          if (!exists) {
+            console.log(
+              `✅ Delivery partner: Added new order ${newOrder.id} to available orders`
+            );
+            return [newOrder, ...prev];
+          }
+          console.log(
+            `⚠️ Delivery partner: Order ${newOrder.id} already exists in available orders`
+          );
+          return prev;
+        });
+      } else {
+        console.error(
+          "❌ Delivery partner: Invalid order data in order:created event"
+        );
+      }
     });
 
     // Listen for order acceptance by other delivery partners
     newSocket.on("order:accepted", (data: { orderId: string }) => {
-      console.log("Order accepted by another delivery partner:", data); 
-      // Remove the accepted order from available orders
-      setAvailableOrders((prev) =>
-        prev.filter((order) => order.id !== data.orderId)
-      );
+      console.log("📢 Delivery partner received order:accepted:", data);
+
+      if (data && data.orderId) {
+        // Remove the accepted order from available orders
+        setAvailableOrders((prev) => {
+          const filtered = prev.filter((order) => order.id !== data.orderId);
+          console.log(
+            `🔄 Delivery partner: Removed order ${data.orderId} from available orders. Remaining: ${filtered.length}`
+          );
+          return filtered;
+        });
+      } else {
+        console.error(
+          "❌ Delivery partner: Invalid data in order:accepted event"
+        );
+      }
     });
 
     // Listen for order cancellations from vendors
     newSocket.on("order:cancelled", (data: { orderId: string }) => {
-      console.log("Order cancelled by vendor:", data);
-      // Remove cancelled order from available orders
-      setAvailableOrders((prev) =>
-        prev.filter((order) => order.id !== data.orderId)
-      );
+      console.log("📢 Delivery partner received order:cancelled:", data);
+
+      if (data && data.orderId) {
+        // Remove cancelled order from available orders
+        setAvailableOrders((prev) => {
+          const filtered = prev.filter((order) => order.id !== data.orderId);
+          console.log(
+            `🔄 Delivery partner: Removed cancelled order ${data.orderId} from available orders. Remaining: ${filtered.length}`
+          );
+          return filtered;
+        });
+      } else {
+        console.error(
+          "❌ Delivery partner: Invalid data in order:cancelled event"
+        );
+      }
+    });
+
+    // Debug: Log all socket events
+    newSocket.onAny((eventName, ...args) => {
+      console.log(`🔍 Delivery Socket Event: ${eventName}`, args);
     });
 
     newSocket.on("disconnect", () => {
@@ -119,6 +176,7 @@ export const DeliveryDashboard: React.FC = () => {
         socket.emit(
           "order:accept",
           orderId,
+          user!.id,
           (success: boolean, message?: string) => {
             if (!success) {
               setError(message || "Failed to accept order");
@@ -129,14 +187,13 @@ export const DeliveryDashboard: React.FC = () => {
         );
       }
 
-      // Then make API call
-      const acceptedOrder = await ordersAPI.acceptOrder(orderId);
-
       // Update local state
       setAvailableOrders((prev) =>
         prev.filter((order) => order.id !== orderId)
       );
-      setMyDeliveries((prev) => [acceptedOrder, ...prev]);
+
+      const orders = await ordersAPI.getMyDeliveries();
+      setMyDeliveries([...orders]);
 
       // Refresh stats
       const updatedStats = await ordersAPI.getDeliveryStats();
@@ -195,11 +252,12 @@ export const DeliveryDashboard: React.FC = () => {
         socket.emit("delivery:completed", { orderId });
       }
 
-      const completedOrder = await ordersAPI.completeDelivery(orderId);
+      // const completedOrder = await ordersAPI.completeDelivery(orderId);
+      const currentOrder = await ordersAPI.getOrderById(orderId);
 
       // Update local state
       setMyDeliveries((prev) =>
-        prev.map((order) => (order.id === orderId ? completedOrder : order))
+        prev.map((order) => (order.id === orderId ? currentOrder : order))
       );
 
       // Refresh stats

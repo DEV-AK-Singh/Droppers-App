@@ -140,13 +140,11 @@ export const getVendorOrders = async (req: AuthRequest, res: Response<ApiRespons
 // Get order by ID
 export const getOrderById = async (req: AuthRequest, res: Response<ApiResponse<Order>>) => {
   try {
-    const { id } = req.params;
-    const vendorId = req.user?.id;
+    const { id } = req.params; 
 
     const order = await prisma.order.findFirst({
       where: {
-        id,
-        vendorId
+        id 
       },
       include: {
         vendor: {
