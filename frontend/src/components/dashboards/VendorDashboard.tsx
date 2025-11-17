@@ -7,6 +7,12 @@ import { CreateOrderForm } from "../orders/CreateOrderForm";
 import { OrderList } from "../orders/OrderList";
 import { io, Socket } from "socket.io-client";
 
+const { VITE_NODE_ENV, 
+  VITE_BACKEND_URL_DEV,
+  VITE_BACKEND_URL_PROD } = import.meta.env;
+
+const BACKEND_URL = `${VITE_NODE_ENV === 'production' ? VITE_BACKEND_URL_PROD : VITE_BACKEND_URL_DEV}`;
+
 export const VendorDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -47,7 +53,7 @@ export const VendorDashboard: React.FC = () => {
 
   // Socket.io setup for real-time updates
   useEffect(() => {
-    const newSocket = io("http://localhost:5000", {
+    const newSocket = io(BACKEND_URL, {
       transports: ["websocket", "polling"],
     });
 

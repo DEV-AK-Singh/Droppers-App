@@ -1,9 +1,9 @@
 import axios, { type AxiosResponse, AxiosError } from 'axios';
-import type { 
-  AuthResponse, 
-  LoginData, 
-  RegisterData, 
-  ApiResponse, 
+import type {
+  AuthResponse,
+  LoginData,
+  RegisterData,
+  ApiResponse,
   User,
   Order,
   CreateOrderData,
@@ -13,7 +13,12 @@ import type {
   DeliveryStats
 } from '../types/auth.ts';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const { VITE_NODE_ENV,
+  VITE_API_BASE_URL,
+  VITE_BACKEND_URL_DEV,
+  VITE_BACKEND_URL_PROD } = import.meta.env;
+
+const API_BASE_URL = `${VITE_NODE_ENV === 'production' ? VITE_BACKEND_URL_PROD : VITE_BACKEND_URL_DEV}/${VITE_API_BASE_URL}`;
 
 // Create axios instance with default config
 export const api = axios.create({
@@ -47,7 +52,7 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       window.location.href = '/';
     }
-    
+
     // Convert axios error to our custom error format
     const customError: ApiError = {
       message: error.response?.data?.message || error.message || 'An unexpected error occurred',
@@ -55,7 +60,7 @@ api.interceptors.response.use(
       status: error.response?.status,
       details: error.response?.data?.errors || error.response?.data?.error,
     };
-    
+
     return Promise.reject(customError);
   }
 );
@@ -68,11 +73,11 @@ const apiCall = async <T>(
 ): Promise<T> => {
   try {
     const response: AxiosResponse<ApiResponse<T>> = await api[method](url, data);
-    
+
     if (!response.data.success) {
       throw new Error(response.data.message);
     }
-    
+
     return response.data.data!;
   } catch (error) {
     throw error;
@@ -81,63 +86,63 @@ const apiCall = async <T>(
 
 // Auth API methods
 export const authAPI = {
-  login: (data: LoginData): Promise<AuthResponse> => 
+  login: (data: LoginData): Promise<AuthResponse> =>
     apiCall<AuthResponse>('post', '/auth/login', data),
 
-  register: (data: RegisterData): Promise<AuthResponse> => 
+  register: (data: RegisterData): Promise<AuthResponse> =>
     apiCall<AuthResponse>('post', '/auth/register', data),
 
-  getProfile: (): Promise<{ user: User }> => 
+  getProfile: (): Promise<{ user: User }> =>
     apiCall<{ user: User }>('get', '/auth/profile'),
 
-  updateProfile: (data: Partial<User>): Promise<{ user: User }> => 
+  updateProfile: (data: Partial<User>): Promise<{ user: User }> =>
     apiCall<{ user: User }>('put', '/auth/profile', data),
 };
 
 // Orders API methods 
-export const ordersAPI = {  
+export const ordersAPI = {
   // Vendor orders
-  createOrder: (data: CreateOrderData): Promise<Order> => 
+  createOrder: (data: CreateOrderData): Promise<Order> =>
     apiCall<Order>('post', '/orders/vendor/create', data),
 
-  getVendorOrders: (): Promise<Order[]> => 
+  getVendorOrders: (): Promise<Order[]> =>
     apiCall<Order[]>('get', '/orders/vendor/my-orders'),
 
-  getVendorStats: (): Promise<DashboardStats> => 
+  getVendorStats: (): Promise<DashboardStats> =>
     apiCall<DashboardStats>('get', '/orders/vendor/stats'),
 
-  updateOrderStatus: (id: string, status: string): Promise<Order> => 
+  updateOrderStatus: (id: string, status: string): Promise<Order> =>
     apiCall<Order>('patch', `/orders/vendor/${id}/status`, { status }),
 
-  cancelOrder: (id: string): Promise<Order> => 
+  cancelOrder: (id: string): Promise<Order> =>
     apiCall<Order>('delete', `/orders/vendor/${id}/cancel`),
 
   // Delivery partner methods
-  getAvailableOrders: (): Promise<Order[]> => 
+  getAvailableOrders: (): Promise<Order[]> =>
     apiCall<Order[]>('get', '/orders/delivery/available'),
 
-  getMyDeliveries: (): Promise<Order[]> => 
+  getMyDeliveries: (): Promise<Order[]> =>
     apiCall<Order[]>('get', '/orders/delivery/my-deliveries'),
 
-  getDeliveryStats: (): Promise<DeliveryStats> => 
+  getDeliveryStats: (): Promise<DeliveryStats> =>
     apiCall<DeliveryStats>('get', '/orders/delivery/stats'),
 
-  acceptOrder: (orderId: string): Promise<Order> => 
+  acceptOrder: (orderId: string): Promise<Order> =>
     apiCall<Order>('post', `/orders/delivery/${orderId}/accept`),
 
-  updateDeliveryStatus: (orderId: string, status: string): Promise<Order> => 
+  updateDeliveryStatus: (orderId: string, status: string): Promise<Order> =>
     apiCall<Order>('patch', `/orders/delivery/${orderId}/status`, { status }),
 
-  completeDelivery: (orderId: string): Promise<Order> => 
+  completeDelivery: (orderId: string): Promise<Order> =>
     apiCall<Order>('post', `/orders/delivery/${orderId}/complete`),
 
   // General orders
-  getOrderById: (id: string): Promise<Order> => 
+  getOrderById: (id: string): Promise<Order> =>
     apiCall<Order>('get', `/orders/${id}`),
 };
 
 // Health check
 export const healthAPI = {
-  check: (): Promise<{ message: string; timestamp: string }> => 
+  check: (): Promise<{ message: string; timestamp: string }> =>
     api.get('/health').then(response => response.data),
 };

@@ -13,14 +13,14 @@ import { ServerToClientEvents, ClientToServerEvents, Order } from './types';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 const prisma = new PrismaClient();
 
 // CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production'
     ? process.env.FRONTEND_URL_PROD
-    : process.env.FRONTEND_URL_DEV || 'http://localhost:5173',
+    : process.env.FRONTEND_URL_DEV,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -218,7 +218,7 @@ io.on('connection', (socket) => {
       });
       console.log(`📢 Notified vendor ${order.vendorId} about order ${orderId} acceptance`);
 
-      console.log(`✅ Order ${orderId} accepted by ${socket.id}`); 
+      console.log(`✅ Order ${orderId} accepted by ${socket.id}`);
 
       callback(true, 'Order accepted successfully');
     } catch (error) {
@@ -407,10 +407,10 @@ httpServer.listen(PORT, () => {
   console.log(`
 🚀 Droppers Server Started!
 📊 Port: ${PORT}
-🌍 Environment: ${process.env.NODE_ENV || 'development'}
-🔗 Frontend URL: ${process.env.FRONTEND_URL_DEV || 'http://localhost:5173'}
-📡 Health Check: http://localhost:${PORT}/health
-🔐 API Base: http://localhost:${PORT}/api
+🌍 Environment: ${process.env.NODE_ENV}
+🔗 Frontend URL: ${process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL_PROD : process.env.FRONTEND_URL_DEV}
+📡 Health Check: ${process.env.NODE_ENV === 'production' ? `${process.env.FRONTEND_URL_PROD}/api/health` : `${process.env.FRONTEND_URL_DEV}/api/health`}
+🔐 API Base: ${process.env.NODE_ENV === 'production' ? `${process.env.FRONTEND_URL_PROD}/api` : `${process.env.FRONTEND_URL_DEV}/api`}
 🔌 Socket.io: Ready for connections
   `);
 }); 
