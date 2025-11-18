@@ -15,6 +15,13 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           rewrite: (path) => path.replace(/^\/api/, '/api'),
+        }, 
+        '/socket.io': {
+          target: env.VITE_NODE_ENV === 'production' ? env.VITE_BACKEND_URL_PROD : env.VITE_BACKEND_URL_DEV,
+          changeOrigin: true,
+          secure: false, 
+          ws: true,
+          rewrite: (path) => path.replace(/^\/socket.io/, '/socket.io'),
         },
       },
     },

@@ -8,10 +8,10 @@ import { OrderList } from "../orders/OrderList";
 import { io, Socket } from "socket.io-client";
 
 const { VITE_NODE_ENV, 
-  VITE_BACKEND_URL_DEV,
-  VITE_BACKEND_URL_PROD } = import.meta.env;
+  VITE_FRONTEND_URL_DEV,
+  VITE_FRONTEND_URL_PROD } = import.meta.env;
 
-const BACKEND_URL = `${VITE_NODE_ENV === 'production' ? VITE_BACKEND_URL_PROD : VITE_BACKEND_URL_DEV}`;
+const FRONTEND_URL = `${VITE_NODE_ENV === 'production' ? VITE_FRONTEND_URL_PROD : VITE_FRONTEND_URL_DEV}`;
 
 export const VendorDashboard: React.FC = () => {
   const { user, logout } = useAuth();
@@ -53,7 +53,7 @@ export const VendorDashboard: React.FC = () => {
 
   // Socket.io setup for real-time updates
   useEffect(() => {
-    const newSocket = io(BACKEND_URL, {
+    const newSocket = io(FRONTEND_URL, {
       transports: ["websocket", "polling"],
     });
 

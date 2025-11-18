@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docker:build": "docker build -t droppers-frontend .",
+    "docker:run": "docker run -p 80:80 droppers-frontend"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
