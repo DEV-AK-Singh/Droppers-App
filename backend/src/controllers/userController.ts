@@ -2,8 +2,8 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
-import { CreateUserInput, LoginInput, AuthResponse, ApiResponse, JwtPayload, User } from '../types';
-import { AuthRequest } from '../middlewares/auth';
+import { CreateUserInput, LoginInput, AuthResponse, ApiResponse, JwtPayload, User } from '../types/index.js';
+import { AuthRequest } from '../middlewares/auth.js';
 
 const prisma = new PrismaClient();
 

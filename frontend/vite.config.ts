@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     server: {
-      port: 5173,
+      port: 8000,
       proxy: {
         '/api': {
           target: env.VITE_NODE_ENV === 'production' ? env.VITE_BACKEND_URL_PROD : env.VITE_BACKEND_URL_DEV,

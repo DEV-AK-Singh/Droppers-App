@@ -7,7 +7,7 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Install dependencies
-RUN npm ci --only=production
+RUN npm ci
 
 # Generate Prisma client
 RUN npx prisma generate
@@ -17,6 +17,9 @@ COPY . .
 
 # Build the application
 RUN npm run build
+
+# Install only production dependencies for runtime
+RUN npm ci --only=production && npm cache clean --force
 
 # Expose port
 EXPOSE 5000

@@ -10,11 +10,11 @@ docker-compose up -d --build
 
 # Wait for services to be healthy
 echo "⏳ Waiting for services to start..."
-sleep 30
+sleep 10
 
 # Run database migrations
 echo "🗃️ Running database migrations..."
-docker-compose exec backend npx prisma migrate deploy
+docker-compose exec backend npm run db:migrate && docker-compose exec backend npm run db:generate && docker-compose exec backend npm run db:push
 
 # Check service status
 echo "🔍 Checking service status..."

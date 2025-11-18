@@ -13,16 +13,11 @@ import type {
   DeliveryStats
 } from '../types/auth.ts';
 
-const { VITE_NODE_ENV,
-  VITE_API_BASE_URL,
-  VITE_BACKEND_URL_DEV,
-  VITE_BACKEND_URL_PROD } = import.meta.env;
-
-const API_BASE_URL = `${VITE_NODE_ENV === 'production' ? VITE_BACKEND_URL_PROD : VITE_BACKEND_URL_DEV}/${VITE_API_BASE_URL}`;
+const { VITE_API_BASE_URL } = import.meta.env; 
 
 // Create axios instance with default config
 export const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: VITE_API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

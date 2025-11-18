@@ -6,7 +6,7 @@ import {
   updateOrderStatus, 
   cancelOrder,
   getVendorStats 
-} from '../controllers/orderController'; 
+} from '../controllers/orderController.js'; 
 import { 
   getAvailableOrders, 
   acceptOrder, 
@@ -14,10 +14,10 @@ import {
   updateDeliveryStatus, 
   getDeliveryStats,
   completeDelivery 
-} from '../controllers/deliveryController';
-import { authenticateToken, requireRole } from '../middlewares/auth';
-import { validateOrderCreation } from '../middlewares/validation';
-import { UserRole } from '../types';
+} from '../controllers/deliveryController.js';
+import { authenticateToken, requireRole } from '../middlewares/auth.js';
+import { validateOrderCreation } from '../middlewares/validation.js';
+import { UserRole } from '../types/index.js';
 
 const router = Router();
 

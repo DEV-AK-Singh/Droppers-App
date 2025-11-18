@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { CreateOrderInput, UpdateOrderInput, ApiResponse, Order, OrderStatus } from '../types';
-import { AuthRequest } from '../middlewares/auth';
+import { CreateOrderInput, UpdateOrderInput, ApiResponse, Order, OrderStatus } from '../types/index.js';
+import { AuthRequest } from '../middlewares/auth.js';
 
 const prisma = new PrismaClient();
 

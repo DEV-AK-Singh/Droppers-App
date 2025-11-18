@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "start": "node dist/index.js",
     "docker:build": "docker build -t droppers-backend .",
     "docker:run": "docker run -p 5000:5000 droppers-backend",
@@ -39,6 +39,7 @@
     "@types/node": "^24.10.1",
     "@types/socket.io-client": "^1.4.36",
     "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }

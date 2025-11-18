@@ -5,9 +5,9 @@ import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { OrderStatus, PrismaClient } from '@prisma/client';
-import authRoutes from './routes/auth';
-import orderRoutes from './routes/orders';
-import { ServerToClientEvents, ClientToServerEvents, Order } from './types';
+import authRoutes from './routes/auth.js';
+import orderRoutes from './routes/orders.js';
+import { ServerToClientEvents, ClientToServerEvents, Order } from './types/index.js';
 
 // Load environment variables
 dotenv.config();
@@ -408,9 +408,9 @@ httpServer.listen(PORT, () => {
 🚀 Droppers Server Started!
 📊 Port: ${PORT}
 🌍 Environment: ${process.env.NODE_ENV}
-🔗 Frontend URL: ${process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL_PROD : process.env.FRONTEND_URL_DEV}
-📡 Health Check: ${process.env.NODE_ENV === 'production' ? `${process.env.FRONTEND_URL_PROD}/api/health` : `${process.env.FRONTEND_URL_DEV}/api/health`}
-🔐 API Base: ${process.env.NODE_ENV === 'production' ? `${process.env.FRONTEND_URL_PROD}/api` : `${process.env.FRONTEND_URL_DEV}/api`}
+🔗 Frontend URL: ${process.env.NODE_ENV === 'production' ? process.env.BACKEND_URL_PROD : process.env.BACKEND_URL_DEV}
+📡 Health Check: ${process.env.NODE_ENV === 'production' ? `${process.env.BACKEND_URL_PROD}/api/health` : `${process.env.BACKEND_URL_PROD}/api/health`}
+🔐 API Base: ${process.env.NODE_ENV === 'production' ? `${process.env.BACKEND_URL_PROD}/api` : `${process.env.BACKEND_URL_PROD}/api`}
 🔌 Socket.io: Ready for connections
   `);
 }); 

@@ -1,20 +1,27 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "lib": ["ES2020"],
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "declaration": false,
-    "sourceMap": true
+    "target": "ES2022", // Or a newer target like "ESNext" for modern features
+    "module": "NodeNext", // For Node.js module resolution
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist", // Output directory for compiled JavaScript files
+    "rootDir": "./src", // Root directory of your TypeScript source files
+    "strict": true, // Enable all strict type-checking options
+    "esModuleInterop": true, // Allows default imports from modules with no default export
+    "skipLibCheck": true, // Skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true, // Enforce consistent casing in file names
+    "resolveJsonModule": true, // Allows importing .json files
+    "sourceMap": true, // Generates source maps for easier debugging
+    "lib": ["es2022"], // Include specific declaration files (e.g., for standard library features)
+    "baseUrl": "./src", // Base URL for module resolution
+    "paths": { // Optional: Define path aliases for cleaner imports
+      "@config/*": ["config/*"],
+      "@controllers/*": ["controllers/*"],
+      "@middlewares/*": ["middlewares/*"],
+      "@models/*": ["models/*"],
+      "@routes/*": ["routes/*"],
+      "@utils/*": ["utils/*"]
+    }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src/**/*"], // Files to include in the compilation
+  "exclude": ["node_modules", "dist"] // Files to exclude from the compilation
 }
