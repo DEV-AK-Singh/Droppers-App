@@ -51,32 +51,16 @@ services:
       dockerfile: Dockerfile
     container_name: droppers-frontend
     ports:
-      - "8000:8000"
+      - "80:8000"
     depends_on:
       - backend
     networks:
       - droppers-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-
-  # Nginx Reverse Proxy (Optional - for production)
-  nginx-proxy:
-    image: nginx:alpine
-    container_name: droppers-nginx
-    ports:
-      - "443:443"
-      - "80:80"
-    volumes:
-      - ./nginx/proxy.conf:/etc/nginx/nginx.conf
-      # - ./nginx/ssl:/etc/nginx/ssl
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - droppers-network
 
 volumes:
   postgres_data:

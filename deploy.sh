@@ -20,7 +20,4 @@ docker-compose exec backend npm run db:migrate && docker-compose exec backend np
 echo "🔍 Checking service status..."
 docker-compose ps
 
-echo "✅ Deployment completed!"
-echo "🌐 Frontend: http://localhost"
-echo "🔗 Backend API: http://localhost:5000"
-echo "🗄️  Database: localhost:5432"
+echo "✅ Deployment completed!" 
