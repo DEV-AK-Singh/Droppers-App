@@ -32,7 +32,7 @@ services:
     environment: 
       DATABASE_URL: postgresql://abhishek:abhishek@postgres:5432/droppers
     ports:
-      - "5000:5000"
+      - "5000:5002"
     depends_on:
       postgres:
         condition: service_healthy
@@ -51,7 +51,7 @@ services:
       dockerfile: Dockerfile
     container_name: droppers-frontend
     ports:
-      - "80:8000"
+      - "80:8002"
     depends_on:
       - backend
     networks:
